@@ -19,14 +19,16 @@ def logGet(logname, logfile):
 
     return logger
 
-def parseArgs():
+def parseArgs(logger):
 
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-f', '--fqdn', required=True, help='FQDN', type=str)
-    parser.add_argument('-s', '--sleep', default=15, help='time between DNS queries in seconds', type=int)
+    parser.add_argument('-s', '--sleep', default=15, help='time between DNS queries in seconds (default=15)', type=int)
 
     args = parser.parse_args()
+
+    logger.debug('Arguments parsed')
 
     return args
 
@@ -61,17 +63,16 @@ def getAddr(fqdn):
 def main():
 
     try:
-        args = parseArgs()
-        logfile = 'fqdn_ip-log.txt'
-        output_file = '{}-output.txt'.format(args.fqdn)
+        logfile = 'fqdn_ip.log'
         logger = logGet(logname='fqdn_ip', logfile=logfile)
+        args = parseArgs(logger)
+        output_file = '{}-output.txt'.format(args.fqdn)
 
         try:
             with open(output_file, 'r') as out_file:
                 ip_str = out_file.read()
-                ip_list = ip_str.split(',')
-                logger.info('IP addresses from {}: {}'.format(output_file, ip_list))
-                ip_set = set(ip_list)
+                ip_set = set(ip_str.split(','))
+                logger.debug('IP addresses from {}: {}'.format(output_file, ip_set))
         except:
             ip_set = set()
 
@@ -85,6 +86,7 @@ def main():
             with open(output_file, 'w') as out_file:
                 out_file.write(','.join(ip_set))
             logger.info('{} IP addresses so far for {}: {}'.format(len(ip_set), args.fqdn, ip_set))
+            logger.info('Next query in {} seconds'.format(args.sleep))
             time.sleep(args.sleep)
     except KeyboardInterrupt:
         print(ip_set)
