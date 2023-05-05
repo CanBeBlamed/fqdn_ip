@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from socket import getaddrinfo
 from ipaddress import IPv4Address, AddressValueError
 import argparse
