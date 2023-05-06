@@ -13,7 +13,7 @@ def logGet(logname, logfile):
     fileHandler.setLevel(logging.DEBUG)
     consoleHandler = logging.StreamHandler()
     consoleHandler.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s-%(name)s-%(levelname)s: %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s: %(message)s')
     consoleHandler.setFormatter(formatter)
     fileHandler.setFormatter(formatter)
     logger.addHandler(consoleHandler)
@@ -48,12 +48,13 @@ def ipValid(ip_address):
     except AddressValueError:
         pass
 
-def getAddr(fqdn):
+def getAddr(fqdn, logger):
 
 
     addr_set = set()
 
     add_res = getaddrinfo(fqdn, 0)
+    logger.debug([add_res, fqdn])
 
     for item in add_res:
         if ipValid(item[-1][0]):
@@ -79,11 +80,11 @@ def main():
             ip_set = set()
 
         while True:
-            curr_ip_set = getAddr(args.fqdn)
-            logger.info('DNS query response: {}'.format(curr_ip_set))
+            curr_ip_set = getAddr(args.fqdn, logger)
+            logger.info('DNS query response: {} {}'.format(args.fqdn, curr_ip_set))
             for ip in curr_ip_set:
                 if ip not in ip_set:
-                    logger.info('New IP address found: {}'.format(ip))
+                    logger.info('New IP address found: {} {}'.format(args.fqdn, ip))
             ip_set.update(curr_ip_set)
             with open(output_file, 'w') as out_file:
                 out_file.write(','.join(ip_set))
